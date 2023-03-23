@@ -1,0 +1,11 @@
+.DS_Store
+.idea/
+out/
+*.log
+target/
+logs/
+dist/
+*.tmp
+node_modules/
+project/project/
+.bsp

@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package bitlap.weather;
+
+service WeatherService {
+  rpc getWeather (WeatherRequest) returns (WeatherReply) {}
+  rpc listWeather (stream WeatherRequest) returns (stream WeatherReply) {}
+  rpc serviceMessage (ServiceMessage) returns (ServiceReply) {}
+}
+
+message WeatherRequest {
+  string city = 1;
+  string region = 2;
+  string countryCode = 3;
+}
+
+enum Status {
+  OK = 0;
+  NOT_FOUND = 1;
+  AMBIGUOUS_CITY = 2;
+  SERVICE_UNAVAILABLE = 3;
+  ERROR = 4;
+}
+message WeatherReply {
+  string city = 1;
+  string region = 2;
+  string countryCode = 3;
+  double temperature = 4;
+  Status status = 5;
+}
+
+enum Signal {
+  STOP = 0;
+  DROP_ALL = 1;
+}
+message ServiceMessage {
+  Signal signal = 1;
+}
+
+message ServiceReply {
+  Status status = 1;
+}
