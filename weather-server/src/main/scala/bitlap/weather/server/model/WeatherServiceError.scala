@@ -1,5 +1,5 @@
 package bitlap.weather.server.model
 
-enum WeatherServiceError:
+enum WeatherServiceError extends Throwable:
   case NotFound      extends WeatherServiceError
   case ProtocolError extends WeatherServiceError

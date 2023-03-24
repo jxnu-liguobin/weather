@@ -1,15 +1,16 @@
 import fs2.grpc.buildinfo.BuildInfo
 
-val scalaVersion_     = "3.2.0"
-val http4sVersion     = "0.23.14"
-val configVersion     = "1.3.1"
-val catsEffectVersion = "3.4.8"
-val scalatestVersion  = "3.2.15"
-val circeVersion      = "0.14.4"
-val pureConfigVersion = "0.17.2"
-val scalaLogVersion   = "3.9.5"
-val slf4jVersion      = "2.0.7"
-
+val scalaVersion_       = "3.2.0"
+val http4sVersion       = "0.23.14"
+val configVersion       = "1.3.1"
+val catsEffectVersion   = "3.4.8"
+val scalatestVersion    = "3.2.15"
+val circeVersion        = "0.14.4"
+val pureConfigVersion   = "0.17.2"
+val scalaLogVersion     = "3.9.5"
+val slf4jVersion        = "2.0.7"
+val sangriaVersion      = "3.5.3"
+val sangriaCirceVersion = "1.3.2"
 ThisBuild / scalaVersion := scalaVersion_
 
 lazy val commonSettings =
@@ -110,7 +111,9 @@ lazy val `weather-server` = project
       "io.circe"              %% "circe-generic"       % circeVersion withSources (),
       "io.circe"              %% "circe-core"          % circeVersion withSources (),
       "org.slf4j"              % "slf4j-api"           % slf4jVersion withSources (),
-      "org.slf4j"              % "slf4j-simple"        % slf4jVersion withSources ()
+      "org.slf4j"              % "slf4j-simple"        % slf4jVersion withSources (),
+      "org.sangria-graphql"   %% "sangria"             % sangriaVersion withSources (),
+      "org.sangria-graphql"   %% "sangria-circe"       % sangriaCirceVersion withSources ()
     )
   )
   .dependsOn(

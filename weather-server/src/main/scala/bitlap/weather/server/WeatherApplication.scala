@@ -11,6 +11,8 @@ import cats.syntax.all.toFlatMapOps
 import cats.syntax.all.catsSyntaxApply
 import cats.syntax.all.toFunctorOps
 import bitlap.weather.server.http.WeatherHttpServer
+import bitlap.weather.server.gql.SangriaGraphQL
+import bitlap.weather.server.gql.fetcher.FetcherContext
 
 object WeatherApplication extends IOApp {
 
@@ -28,8 +30,13 @@ object WeatherApplication extends IOApp {
                | |__| /____  >_______ \   \/\_/  \___  >____  /__| |___|  /\___  >__|   
                |           \/        \/              \/     \/          \/     \/       """.stripMargin)
         ) *> async.delay(println(s"Started at port ${WeatherGrpcServer.port}"))
+        fetcherContext = FetcherContext[F](
+          dataProvider,
+          weatherClient,
+          dispatcher
+        )
         _ <- WeatherHttpServer
-          .service[F](dispatcher, dataProvider, weatherClient)
+          .service[F](dispatcher, dataProvider, weatherClient, SangriaGraphQL.graphQL[F](fetcherContext))
           .use(s => async.delay(println(s"Started HTTP: ${s.address}")) *> async.never)
         _ <- WeatherGrpcServer
           .service[F](weatherClient, dataProvider, dispatcher, stop)

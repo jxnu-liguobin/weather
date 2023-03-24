@@ -35,7 +35,7 @@ To run the streaming client execute
 sbt "client/runMain bitlap.weather.client.StreamingWeatherClient"
 ```
 
-## http4s server
+## http4s http
 
 ```
 curl --location 'http://localhost:8888/weather' \
@@ -45,4 +45,11 @@ curl --location 'http://localhost:8888/weather' \
     "countryCode": "CN",
     "region": "Beijing"
 }'
+```
+
+## sangria graphql
+```
+curl --location 'http://localhost:8888/graphql' \
+--header 'Content-Type: application/json' \
+--data '{"query":"query test {\n    city(name:\"Beijing\",countryCode:\"CN\"){\n     value\n    }\n}","variables":{}}'
 ```
