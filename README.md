@@ -1,6 +1,6 @@
 # Weather
 
-> Original Project [weather-rpc](https://github.com/dimaopen/weather-rpc)
+> Reference Project [weather-rpc](https://github.com/dimaopen/weather-rpc),It based on Scala 2 and cats 1, and does not use fs2-grpc and sangria
 
 # Description
 A web server that allows to get the current temperature at most of the big cities in the world.
