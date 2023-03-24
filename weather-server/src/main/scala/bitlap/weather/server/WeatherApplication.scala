@@ -7,6 +7,8 @@ import cats.effect.std.Dispatcher
 import io.grpc.Server
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import fs2.grpc.syntax.all._
+import cats.syntax.all.toFlatMapOps
+import cats.syntax.all.catsSyntaxApply
 
 object WeatherApplication extends IOApp {
 
@@ -29,21 +31,27 @@ object WeatherApplication extends IOApp {
         .map(_.start())
     yield server
 
-  private def executeServer(weatherClient: OpenWeatherClient[IO]): IO[ExitCode] =
-    Dispatcher.sequential[IO].use { dispatcher =>
+  import cats.syntax.all.toFunctorOps
+
+  private def executeServer[F[_]: Async](weatherClient: OpenWeatherClient[F]): F[ExitCode] =
+    val async = implicitly[Async[F]]
+    Dispatcher.sequential[F].use { dispatcher =>
       for
-        stop         <- Deferred[IO, Unit]
-        dataProvider <- DataProvider.dataProvider[IO]
-        s <- IO(
+        stop         <- Deferred[F, Unit]
+        dataProvider <- DataProvider.dataProvider[F]
+        s <- async.delay(
           println("""_____      ________                          __  .__                  
                |_/ ____\_____\_____  \  __  _  __ ____ _____ _/  |_|  |__   ___________ 
                |\   __\/  ___//  ____/  \ \/ \/ // __ \\__  \\   __\  |  \_/ __ \_  __ \
                | |  |  \___ \/       \   \     /\  ___/ / __ \|  | |   Y  \  ___/|  | \/
                | |__| /____  >_______ \   \/\_/  \___  >____  /__| |___|  /\___  >__|   
                |           \/        \/              \/     \/          \/     \/       """.stripMargin)
-        ) *> IO(println(s"Started at port $port"))
-        _ <- app[IO](weatherClient, dataProvider, dispatcher, stop)
-          .use(s => stop.get *> IO.delay(s.shutdown()) *> IO(println(s"Stopped by client Signal.STOP")))
+        ) *> async.delay(println(s"Started at port $port"))
+        _ <- app[F](weatherClient, dataProvider, dispatcher, stop)
+          .use(s =>
+            stop.get *> async.delay(s.shutdown()) *>
+              async.delay(println(s"Stopped by client Signal.STOP"))
+          )
       yield ExitCode.Success
     }
 
@@ -65,7 +73,7 @@ object WeatherApplication extends IOApp {
         case Right(cfg) =>
           OpenWeatherClient
             .openWeatherClient[IO](cfg.openWeatherApiKey)
-            .use(client => executeServer(client))
+            .use(client => executeServer[IO](client))
       }
     yield exitCode
   }
