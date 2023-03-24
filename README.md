@@ -4,16 +4,14 @@
 
 # Description
 A web server that allows to get the current temperature at most of the big cities in the world.
-It is written in Scala3 using cats-effect 3, fs2-grpc and http4s.
 
-# How to setup project
-You need [sbt](https://www.scala-sbt.org/) for building the project.
-
-1. clone this project
-  ```shell
-  git clone <this project url>
-  ```
-1. Import the project into your favorite IDE.
+# technology stack
+- 
+- Scala3
+- cats-effect 3
+- fs2-grpc
+- http4s
+- circe
 
 # Running
 
@@ -22,7 +20,7 @@ You need [sbt](https://www.scala-sbt.org/) for building the project.
 sbt "server/runMain bitlap.weather.server.WeatherApplication"
 ```
 
-## Client apps
+## client apps
 There are 2 clients in the project:
 1. a simple client that gets the temperature for a single city and sends a shutdown server command
 2. a streaming client that gets the temperature for multiple cities in a stream mode.
@@ -35,4 +33,16 @@ sbt "client/runMain bitlap.weather.client.SimpleWeatherClient"
 To run the streaming client execute
 ```shell
 sbt "client/runMain bitlap.weather.client.StreamingWeatherClient"
+```
+
+## http4s server
+
+```
+curl --location 'http://localhost:8888/weather' \
+--header 'Content-Type: application/json' \
+--data '{
+    "name": "Beijing",
+    "countryCode": "CN",
+    "region": "Beijing"
+}'
 ```

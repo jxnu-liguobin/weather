@@ -14,24 +14,23 @@ class DataProvider(private val map: Map[CityInCountry, Map[String, String]]) {
     cityName: String,
     countryCode: String,
     regionMap: Map[String, String],
-    region: Option[String]
+    region: String
   ): Either[Int, City] =
     regionMap.size match {
       case 1 =>
         val regionWeHave = regionMap.head._1
+        val r            = if (region.isEmpty) regionWeHave else region
         regionMap
-          .get(region.getOrElse(regionWeHave))
+          .get(r)
           .map(id => City(cityName, regionWeHave, countryCode, id))
           .toRight(0)
       case size =>
-        region match {
-          case Some(reg) =>
-            regionMap
-              .get(reg)
-              .map(id => City(cityName, reg, countryCode, id))
-              .toRight(0)
-          case None => size.asLeft
-        }
+        if (region.isEmpty) Left(0)
+        else
+          regionMap
+            .get(region)
+            .map(id => City(cityName, region, countryCode, id))
+            .toRight(0)
     }
 
   def findCity(cityToFind: CitySearch): Either[Int, City] =

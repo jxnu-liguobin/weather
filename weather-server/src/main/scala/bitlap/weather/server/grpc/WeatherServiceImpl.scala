@@ -48,7 +48,7 @@ class WeatherServiceImpl[F[_]: Async](
     request.buffer(streamTakeBuffer).mapChunks { req =>
       val (notFound, found) = dataProvider.findCities(req.map(r => CitySearch(r.city, r.countryCode, r.region)).toList)
       val errors = notFound.map { case (citySearch, num) =>
-        toError(citySearch.name, citySearch.region.getOrElse(""), citySearch.countryCode, num)
+        toError(citySearch.name, citySearch.region, citySearch.countryCode, num)
       }
       val idMap = found.map(city => city.id -> city).toMap
       val replies = (if found.isEmpty then F.pure(Map[String, Double]().asRight[WeatherServiceError])

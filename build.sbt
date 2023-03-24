@@ -104,8 +104,10 @@ lazy val `weather-server` = project
       "com.github.pureconfig" %% "pureconfig-core"     % pureConfigVersion withSources (),
       "org.http4s"            %% "http4s-dsl"          % http4sVersion withSources (),
       "org.http4s"            %% "http4s-blaze-client" % http4sVersion withSources (),
+      "org.http4s"            %% "http4s-blaze-server" % http4sVersion withSources (),
       "org.http4s"            %% "http4s-circe"        % http4sVersion withSources (),
       "io.circe"              %% "circe-parser"        % circeVersion withSources (),
+      "io.circe"              %% "circe-generic"       % circeVersion withSources (),
       "io.circe"              %% "circe-core"          % circeVersion withSources (),
       "org.slf4j"              % "slf4j-api"           % slf4jVersion withSources (),
       "org.slf4j"              % "slf4j-simple"        % slf4jVersion withSources ()

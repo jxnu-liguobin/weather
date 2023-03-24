@@ -1,37 +1,18 @@
 package bitlap.weather.server
 
-import bitlap.weather.server.grpc.WeatherServiceImpl
+import bitlap.weather.server.grpc.{WeatherGrpcServer, WeatherServiceImpl}
 import bitlap.weather.weather.WeatherServiceFs2Grpc
-import cats.effect._
+import cats.effect.*
 import cats.effect.std.Dispatcher
 import io.grpc.Server
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
-import fs2.grpc.syntax.all._
+import fs2.grpc.syntax.all.*
 import cats.syntax.all.toFlatMapOps
 import cats.syntax.all.catsSyntaxApply
+import cats.syntax.all.toFunctorOps
+import bitlap.weather.server.http.WeatherHttpServer
 
 object WeatherApplication extends IOApp {
-
-  val port = 9999
-
-  private def app[F[_]: Async](
-    weatherClient: OpenWeatherClient[F],
-    dataProvider: DataProvider,
-    dispatcher: Dispatcher[F],
-    stop: Deferred[F, Unit]
-  ): Resource[F, Server] =
-    for
-      service <- WeatherServiceFs2Grpc.bindServiceResource[F](
-        new WeatherServiceImpl(weatherClient, dataProvider, dispatcher, stop)
-      )
-      server <- NettyServerBuilder
-        .forPort(port)
-        .addService(service)
-        .resource[F]
-        .map(_.start())
-    yield server
-
-  import cats.syntax.all.toFunctorOps
 
   private def executeServer[F[_]: Async](weatherClient: OpenWeatherClient[F]): F[ExitCode] =
     val async = implicitly[Async[F]]
@@ -46,11 +27,15 @@ object WeatherApplication extends IOApp {
                | |  |  \___ \/       \   \     /\  ___/ / __ \|  | |   Y  \  ___/|  | \/
                | |__| /____  >_______ \   \/\_/  \___  >____  /__| |___|  /\___  >__|   
                |           \/        \/              \/     \/          \/     \/       """.stripMargin)
-        ) *> async.delay(println(s"Started at port $port"))
-        _ <- app[F](weatherClient, dataProvider, dispatcher, stop)
+        ) *> async.delay(println(s"Started at port ${WeatherGrpcServer.port}"))
+        _ <- WeatherHttpServer
+          .service[F](dispatcher, dataProvider, weatherClient)
+          .use(s => async.delay(println(s"Started HTTP: ${s.address}")) *> async.never)
+        _ <- WeatherGrpcServer
+          .service[F](weatherClient, dataProvider, dispatcher, stop)
           .use(s =>
             stop.get *> async.delay(s.shutdown()) *>
-              async.delay(println(s"Stopped by client Signal.STOP"))
+              async.delay(println(s"Stopped by client Signal: STOP"))
           )
       yield ExitCode.Success
     }
@@ -63,8 +48,6 @@ object WeatherApplication extends IOApp {
     final case class MyConfig(openWeatherApiKey: String)
     implicit val reader: ConfigReader[MyConfig] =
       ConfigReader.forProduct1("open-weather-api-key")(MyConfig.apply)
-    implicit val writer: ConfigWriter[MyConfig] =
-      ConfigWriter.forProduct1("open-weather-api-key") { case MyConfig(a) => a }
 
     for
       cfg <- IO(ConfigSource.default.load[MyConfig])
