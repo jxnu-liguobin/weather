@@ -6,7 +6,7 @@
 A web server that allows to get the current temperature at most of the big cities in the world.
 
 # technology stack
-- 
+ 
 - Scala3
 - cats-effect 3
 - fs2-grpc
