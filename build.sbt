@@ -54,7 +54,7 @@ lazy val `weather-protobuf` = project
   .in(file("weather-protobuf"))
   .settings(commonSettings)
   .settings(
-    name := "protobuf",
+    name := "weather-protobuf",
 //    Compile / PB.targets := Seq(
 //      scalapb.gen(grpc = true) -> (Compile / sourceManaged).value, {
 //        protocbridge.SandboxedJvmGenerator.forModule(
