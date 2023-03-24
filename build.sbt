@@ -10,6 +10,8 @@ val pureConfigVersion = "0.17.2"
 val scalaLogVersion   = "3.9.5"
 val slf4jVersion      = "2.0.7"
 
+ThisBuild / scalaVersion := scalaVersion_
+
 lazy val commonSettings =
   Seq(
     organization := "org.bitlap",

@@ -4,8 +4,6 @@ import bitlap.weather.weather.Signal._
 import bitlap.weather.weather._
 import cats.effect._
 import cats.implicits.{catsSyntaxFlatMapOps, toFunctorOps}
-import fs2.grpc.syntax.all._
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder
 import io.grpc.{Status => _, _}
 
 object SimpleWeatherClient extends IOApp {
@@ -35,19 +33,11 @@ object SimpleWeatherClient extends IOApp {
       }
   }
 
-  implicit val sync: Async[IO] = implicitly[Async[IO]]
-
   override def run(args: List[String]): IO[ExitCode] = {
-    val city        = args.headOption.getOrElse("Athens")
-    val countryCode = args.drop(1).headOption.getOrElse("GR")
-    val managedChannelResource: Resource[IO, ManagedChannel] =
-      NettyChannelBuilder
-        .forAddress("127.0.0.1", 9999)
-        .usePlaintext()
-        .resource[IO]
-
-    managedChannelResource.use(channel => readWeatherAndStopServer(city, countryCode, channel)) >>
-      IO(ExitCode.Success).handleErrorWith(_ => IO(ExitCode.Error))
-
+    val city        = args.headOption.getOrElse("Beijing")
+    val countryCode = args.drop(1).headOption.getOrElse("CN")
+    (fs2GrpcClient.use(channel => readWeatherAndStopServer(city, countryCode, channel)) >>
+      IO(ExitCode.Success))
+      .handleErrorWith(_ => IO(ExitCode.Error))
   }
 }
