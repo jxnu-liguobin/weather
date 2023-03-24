@@ -12,6 +12,7 @@ A web server that allows to get the current temperature at most of the big citie
 - fs2-grpc
 - http4s
 - circe
+- sangria
 
 # Running
 
