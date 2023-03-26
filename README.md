@@ -1,5 +1,7 @@
 # Weather
 
+![CI][Badge-CI]
+
 > Reference Project [weather-rpc](https://github.com/dimaopen/weather-rpc),It based on Scala 2 and cats 1, and does not use fs2-grpc and sangria
 
 # Description
@@ -54,3 +56,5 @@ curl --location 'http://localhost:8888/graphql' \
 --header 'Content-Type: application/json' \
 --data '{"query":"query test {\n    city(name:\"Beijing\",countryCode:\"CN\"){\n     value\n    }\n}","variables":{}}'
 ```
+
+[Badge-CI]: https://github.com/bitlap/weather/actions/workflows/ScalaCI.yml/badge.svg
