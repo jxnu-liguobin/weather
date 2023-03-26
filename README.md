@@ -7,9 +7,9 @@
 # Description
 A web server that allows to get the current temperature at most of the big cities in the world.
 
-# technology stack
+# Technology stack
  
-- Scala3
+- Scala 3
 - cats-effect 3
 - fs2-grpc
 - http4s
@@ -23,7 +23,7 @@ A web server that allows to get the current temperature at most of the big citie
 sbt "weather-server/runMain bitlap.weather.server.WeatherApplication"
 ```
 
-## client apps
+## Client apps
 There are 2 clients in the project:
 1. a simple client that gets the temperature for a single city and sends a shutdown server command
 2. a streaming client that gets the temperature for multiple cities in a stream mode.
