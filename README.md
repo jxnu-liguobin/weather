@@ -18,7 +18,7 @@ A web server that allows to get the current temperature at most of the big citie
 
 * You need to run the server app. Go to the project dir and execute
 ```shell
-sbt "server/runMain bitlap.weather.server.WeatherApplication"
+sbt "weather-server/runMain bitlap.weather.server.WeatherApplication"
 ```
 
 ## client apps
@@ -29,11 +29,11 @@ There are 2 clients in the project:
 
 To run the simple client execute
 ```shell
-sbt "client/runMain bitlap.weather.client.SimpleWeatherClient"
+sbt "weather-client/runMain bitlap.weather.client.SimpleWeatherClient"
 ```
 To run the streaming client execute
 ```shell
-sbt "client/runMain bitlap.weather.client.StreamingWeatherClient"
+sbt "weather-client/runMain bitlap.weather.client.StreamingWeatherClient"
 ```
 
 ## http4s http

@@ -19,10 +19,10 @@ object WeatherApplication extends IOApp {
   private def executeServer[F[_]: Async](weatherClient: OpenWeatherClient[F]): F[ExitCode] =
     val async = implicitly[Async[F]]
     Dispatcher.sequential[F].use { dispatcher =>
-      for
+      for {
         stop         <- Deferred[F, Unit]
         dataProvider <- DataProvider.dataProvider[F]
-        s <- async.delay(
+        _ <- async.delay(
           println("""_____      ________                          __  .__                  
                |_/ ____\_____\_____  \  __  _  __ ____ _____ _/  |_|  |__   ___________ 
                |\   __\/  ___//  ____/  \ \/ \/ // __ \\__  \\   __\  |  \_/ __ \_  __ \
@@ -30,21 +30,28 @@ object WeatherApplication extends IOApp {
                | |__| /____  >_______ \   \/\_/  \___  >____  /__| |___|  /\___  >__|   
                |           \/        \/              \/     \/          \/     \/       """.stripMargin)
         ) *> async.delay(println(s"Started at port ${WeatherGrpcServer.port}"))
+
+        s1 <- async.start(
+          WeatherGrpcServer
+            .service[F](weatherClient, dataProvider, dispatcher, stop)
+            .use(s =>
+              stop.get *> async.delay(s.shutdown()) *>
+                async.delay(println(s"Stopped by client Signal: STOP"))
+            )
+        )
         fetcherContext = FetcherContext[F](
           dataProvider,
           weatherClient,
           dispatcher
         )
-        _ <- WeatherHttpServer
-          .service[F](dispatcher, dataProvider, weatherClient, SangriaGraphQL.graphQL[F](fetcherContext))
-          .use(s => async.delay(println(s"Started HTTP: ${s.address}")) *> async.never)
-        _ <- WeatherGrpcServer
-          .service[F](weatherClient, dataProvider, dispatcher, stop)
-          .use(s =>
-            stop.get *> async.delay(s.shutdown()) *>
-              async.delay(println(s"Stopped by client Signal: STOP"))
-          )
-      yield ExitCode.Success
+        s2 <- async.start(
+          WeatherHttpServer
+            .service[F](dispatcher, dataProvider, weatherClient, SangriaGraphQL.graphQL[F](fetcherContext))
+            .use(s => async.delay(println(s"Started HTTP: ${s.address}")))
+        )
+        _ <- s1.join
+        _ <- s2.join
+      } yield ExitCode.Success
     }
 
   override def run(args: List[String]): IO[ExitCode] = {

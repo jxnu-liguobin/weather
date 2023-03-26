@@ -31,7 +31,4 @@ object WeatherGrpcServer {
         .resource[F]
         .map(_.start())
     yield server
-
-  import cats.syntax.all.toFunctorOps
-
 }

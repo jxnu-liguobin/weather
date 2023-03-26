@@ -1,10 +1,12 @@
 package bitlap.weather.client
 
-import bitlap.weather.weather.Signal._
-import bitlap.weather.weather._
-import cats.effect._
+import bitlap.weather.weather.Signal.*
+import bitlap.weather.weather.*
+import cats.effect.*
 import cats.implicits.{catsSyntaxFlatMapOps, toFunctorOps}
-import io.grpc.{Status => _, _}
+import io.grpc.{Status as _, *}
+
+import scala.concurrent.duration.Duration
 
 object SimpleWeatherClient extends IOApp {
 
@@ -29,15 +31,18 @@ object SimpleWeatherClient extends IOApp {
         val stopMessage = new ServiceMessage(STOP)
         stub.serviceMessage(dropMessage, new Metadata)
         stub.serviceMessage(stopMessage, new Metadata).map(_.status)
-
       }
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
     val city        = args.headOption.getOrElse("Beijing")
     val countryCode = args.drop(1).headOption.getOrElse("CN")
-    (fs2GrpcClient.use(channel => readWeatherAndStopServer(city, countryCode, channel)) >>
-      IO(ExitCode.Success))
-      .handleErrorWith(_ => IO(ExitCode.Error))
+    for {
+      client <- fs2GrpcClient
+        .use(channel => readWeatherAndStopServer(city, countryCode, channel))
+        .timeout(Duration("10s"))
+        .andWait(Duration("10s"))
+      _ <- IO.delay(println(s"client status: $client"))
+    } yield ExitCode.Success
   }
 }

@@ -10,6 +10,8 @@ import cats.syntax.functor.*
 import io.grpc.stub.StreamObserver
 import io.grpc.{Channel, Metadata}
 
+import scala.concurrent.duration.Duration
+
 object StreamingWeatherClient extends IOApp {
 
   private def readWeather[F[_]: Async](
@@ -51,8 +53,14 @@ object StreamingWeatherClient extends IOApp {
           ("Beibei", "CN")
         )
       else args.zip(args.tail)
-    (Deferred[IO, Unit].flatMap { finishedFlag =>
-      fs2GrpcClient.use(channel => readWeather[IO](cities, channel, finishedFlag)) >> finishedFlag.get
-    } *> IO(ExitCode.Success)).handleErrorWith(_ => IO(ExitCode.Error))
+
+    for {
+      finishedFlag <- Deferred[IO, Unit]
+      client <- fs2GrpcClient
+        .use(channel => readWeather[IO](cities, channel, finishedFlag))
+        .timeout(Duration("10s"))
+        .andWait(Duration("10s")) <& finishedFlag.get
+      _ <- IO.delay(println(s"client status: $client"))
+    } yield ExitCode.Success
   }
 }
