@@ -1,7 +1,7 @@
 package bitlap.weather.server
 
 import bitlap.weather.server.grpc.{WeatherGrpcServer, WeatherServiceImpl}
-import bitlap.weather.weather.WeatherServiceFs2Grpc
+import bitlap.weather.WeatherServiceFs2Grpc
 import cats.effect.*
 import cats.effect.std.Dispatcher
 import io.grpc.Server
@@ -36,7 +36,7 @@ object WeatherApplication extends IOApp {
             .service[F](weatherClient, dataProvider, dispatcher, stop)
             .use(s =>
               stop.get *> async.delay(s.shutdown()) *>
-                async.delay(println(s"Stopped by client Signal: STOP"))
+                async.delay(println(s"Grpc Stopped by client Signal: STOP"))
             )
         )
         fetcherContext = FetcherContext[F](
@@ -47,10 +47,10 @@ object WeatherApplication extends IOApp {
         s2 <- async.start(
           WeatherHttpServer
             .service[F](dispatcher, dataProvider, weatherClient, SangriaGraphQL.graphQL[F](fetcherContext))
-            .use(s => async.delay(println(s"Started HTTP: ${s.address}")))
+            .use(s => async.delay(println(s"Started HTTP: ${s.address}")) *> async.never)
         )
-        _ <- s1.join
         _ <- s2.join
+        _ <- s1.join
       } yield ExitCode.Success
     }
 

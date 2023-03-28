@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package bitlap.weather;
+package bitlap;
 
 service WeatherService {
   rpc getWeather (WeatherRequest) returns (WeatherReply) {}

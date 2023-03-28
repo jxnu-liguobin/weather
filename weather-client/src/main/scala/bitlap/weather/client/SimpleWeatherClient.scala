@@ -1,7 +1,7 @@
 package bitlap.weather.client
 
-import bitlap.weather.weather.Signal.*
-import bitlap.weather.weather.*
+import bitlap.weather.Signal.*
+import bitlap.weather.*
 import cats.effect.*
 import cats.implicits.{catsSyntaxFlatMapOps, toFunctorOps}
 import io.grpc.{Status as _, *}

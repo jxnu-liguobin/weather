@@ -2,8 +2,8 @@ package bitlap.weather.server.grpc
 
 import bitlap.weather.server.model.{CitySearch, WeatherServiceError}
 import bitlap.weather.server.{DataProvider, OpenWeatherClient}
-import bitlap.weather.weather.Status._
-import bitlap.weather.weather._
+import bitlap.weather.Status._
+import bitlap.weather._
 import cats.effect._
 import cats.effect.std.Dispatcher
 import cats.implicits.catsSyntaxApply
@@ -45,6 +45,7 @@ class WeatherServiceImpl[F[_]: Async](
   }
 
   override def listWeather(request: fs2.Stream[F, WeatherRequest], ctx: Metadata): fs2.Stream[F, WeatherReply] =
+    logger.info(s"listWeather: got request '$request'")
     request.buffer(streamTakeBuffer).mapChunks { req =>
       val (notFound, found) = dataProvider.findCities(req.map(r => CitySearch(r.city, r.countryCode, r.region)).toList)
       val errors = notFound.map { case (citySearch, num) =>

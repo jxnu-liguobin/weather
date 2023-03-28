@@ -2,7 +2,7 @@ package bitlap.weather.server.grpc
 
 import bitlap.weather.server.{DataProvider, OpenWeatherClient}
 import bitlap.weather.server.grpc.WeatherServiceImpl
-import bitlap.weather.weather.WeatherServiceFs2Grpc
+import bitlap.weather.WeatherServiceFs2Grpc
 import cats.effect.*
 import cats.effect.std.Dispatcher
 import io.grpc.Server
